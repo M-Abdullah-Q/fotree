@@ -46,7 +46,13 @@ export function printTree(
     .readdirSync(dirPath, { withFileTypes: true })
     .filter((item) => {
       const fullPath = path.join(dirPath, item.name);
-      const relativePath = path.relative(root, fullPath).replace(/\\/g, "/");
+      let relativePath = path.relative(root, fullPath).replace(/\\/g, "/");
+
+      // 🔥 IMPORTANT: add trailing slash for directories
+      if (item.isDirectory()) {
+        relativePath += "/";
+      }
+
       return !ig.ignores(relativePath);
     })
     .sort((a, b) => {
