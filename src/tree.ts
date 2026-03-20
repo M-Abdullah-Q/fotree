@@ -33,7 +33,8 @@ export function printTree(
   options: TreeOptions,
   prefix = "",
   currentDepth = 0,
-  ig = ignore()
+  ig = ignore(),
+  root = dirPath
 ) {
   if (currentDepth === 0 && options.ignorePatterns) {
     ig.add(options.ignorePatterns);
@@ -43,10 +44,11 @@ export function printTree(
 
   const items = fs
     .readdirSync(dirPath, { withFileTypes: true })
-    .filter(
-      (item) =>
-        !ig.ignores(path.relative(dirPath, path.join(dirPath, item.name)))
-    )
+    .filter((item) => {
+      const fullPath = path.join(dirPath, item.name);
+      const relativePath = path.relative(root, fullPath).replace(/\\/g, "/");
+      return !ig.ignores(relativePath);
+    })
     .sort((a, b) => {
       if (a.isDirectory() && !b.isDirectory()) return -1;
       if (!a.isDirectory() && b.isDirectory()) return 1;
